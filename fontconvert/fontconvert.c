@@ -25,8 +25,6 @@ See notes at end for glyph nomenclature & other tidbits.
 #include FT_GLYPH_H
 #include "../gfxfont.h" // Adafruit_GFX font structures
 
-#define DPI 141 // Approximate res. of Adafruit 2.8" TFT
-
 // Accumulate bits for output, with periodic hexadecimal byte write
 void enbit(uint8_t value) {
 	static uint8_t row = 0, sum = 0, bit = 0x80, firstCall = 1;
@@ -48,7 +46,7 @@ void enbit(uint8_t value) {
 }
 
 int main(int argc, char *argv[]) {
-	int                i, j, err, size, first=' ', last='~',
+	int                i, j, err, size, dpi = 72, first=' ', last='~',
 	                   bitmapOffset = 0, x, y, byte;
 	char              *fontName, c, *ptr;
 	FT_Library         library;
@@ -67,18 +65,26 @@ int main(int argc, char *argv[]) {
 	// ' ' (space) and '~', respectively
 
 	if(argc < 3) {
-		fprintf(stderr, "Usage: %s fontfile size [first] [last]\n",
-		  argv[0]);
+		fprintf(stderr, "Usage: %s fontfile size [DPI = %d] [first = %d ('%c')] [last = %d ('%c')]\n",
+		  argv[0],
+		  dpi,
+		  first,
+		  first,
+		  last,
+		  last);
 		return 1;
 	}
 
 	size = atoi(argv[2]);
 
-	if(argc == 4) {
-		last  = atoi(argv[3]);
-	} else if(argc == 5) {
-		first = atoi(argv[3]);
-		last  = atoi(argv[4]);
+	if (argc >= 3) {
+		dpi = atoi(argv[3]);
+	}
+	if (argc >= 4) {
+		first = atoi(argv[4]);
+	}
+	if (argc >= 4) {
+		last = atoi(argv[5]);
 	}
 
 	if(last < first) {
@@ -124,7 +130,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// << 6 because '26dot6' fixed-point format
-	FT_Set_Char_Size(face, size << 6, 0, DPI, 0);
+	FT_Set_Char_Size(face, size << 6, 0, dpi, 0);
 
 	// Currently all symbols from 'first' to 'last' are processed.
 	// Fonts may contain WAY more glyphs than that, but this code
