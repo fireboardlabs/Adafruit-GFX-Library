@@ -23,6 +23,8 @@ See notes at end for glyph nomenclature & other tidbits.
 #include <stdint.h>
 #include <ft2build.h>
 #include FT_GLYPH_H
+#include FT_DRIVER_H
+#include FT_MODULE_H
 #include "../gfxfont.h" // Adafruit_GFX font structures
 
 // Accumulate bits for output, with periodic hexadecimal byte write
@@ -123,6 +125,13 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "FreeType init error: %d", err);
 		return err;
 	}
+
+
+	FT_UInt     interpreter_version = TT_INTERPRETER_VERSION_35;
+	FT_Property_Set( library, "truetype",
+                                  "interpreter-version",
+                                  &interpreter_version );	
+
 	if((err = FT_New_Face(library, argv[1], 0, &face))) {
 		fprintf(stderr, "Font load error: %d", err);
 		FT_Done_FreeType(library);
